@@ -1,0 +1,8 @@
+//开发板截屏
+hdc shell snapshot_display -f /data/local/tmp/snapshot.jpeg
+
+//发送截屏图片到电脑
+hdc file recv /data/local/tmp/snapshot.jpeg snapshot.jpeg
+
+gradle javafx:
+implementation 'org.openjfx:javafx-fxml:11'
