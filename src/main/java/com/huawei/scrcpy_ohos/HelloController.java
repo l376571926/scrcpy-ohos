@@ -1,7 +1,8 @@
-package sample;
+package com.huawei.scrcpy_ohos;
 
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -10,12 +11,20 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Controller {
+public class HelloController {
+    @FXML
+    private Label welcomeText;
+
+    @FXML
+    protected void onHelloButtonClick() {
+        welcomeText.setText("Welcome to JavaFX Application!");
+    }
+
     @FXML
     ImageView my_image;
     Runtime runtime;
 
-    public Controller() {
+    public HelloController() {
         System.out.println("constructor");
 
 //        List<String> logList = new ArrayList<>();
@@ -56,7 +65,7 @@ public class Controller {
                 switch (event.getButton()) {
                     case PRIMARY:
                         System.out.println("event.getButton() 左键");
-                        click((int) (x * Main.scaleRatio), (int) (y * Main.scaleRatio));
+                        click((int) (x * HelloApplication.scaleRatio), (int) (y * HelloApplication.scaleRatio));
 
                         delayRefreshUI();
                         break;
@@ -89,7 +98,7 @@ public class Controller {
 
         //hdc shell uinput -T -g 466 748 466 668
         try {
-            Process process = runtime.exec(String.format("hdc shell uinput -T -g %d %d %d %d", (int) (startX * Main.scaleRatio), (int) (startY * Main.scaleRatio), (int) (startX * Main.scaleRatio), (int) ((startY + deltaY) * Main.scaleRatio)));
+            Process process = runtime.exec(String.format("hdc shell uinput -T -g %d %d %d %d", (int) (startX * HelloApplication.scaleRatio), (int) (startY * HelloApplication.scaleRatio), (int) (startX * HelloApplication.scaleRatio), (int) ((startY + deltaY) * HelloApplication.scaleRatio)));
             System.out.println("滚动日志--------start------------");
             printShellLog(process.getInputStream());
             System.out.println("滚动日志--------finish------------");
@@ -138,7 +147,12 @@ public class Controller {
     }
 
     public boolean sendScreen2PC(String screenshot_path) throws IOException {
-        Process process1 = runtime.exec("hdc file recv " + screenshot_path + " " + getProjectRootDir() + "\\snapshot\\temp" + System.currentTimeMillis() + ".jpeg");
+        String target_path = getProjectRootDir() + "\\snapshot\\temp" + System.currentTimeMillis() + ".jpeg";
+        File file = new File(target_path);
+        if (!file.getParentFile().exists()) {
+            boolean mkdirs = file.getParentFile().mkdirs();
+        }
+        Process process1 = runtime.exec("hdc file recv " + screenshot_path + " " + target_path);
         System.out.println("图传日志------------start---------------");
         List<String> list = printShellLog(process1.getInputStream());
         System.out.println("图传日志------------finish---------------");
@@ -199,7 +213,7 @@ public class Controller {
             System.out.println("图片模式应为jpeg：" + path);
             return;
         }
-        my_image.setImage(Main.createImage(path));
+        my_image.setImage(HelloApplication.createImage(path));
 
         System.out.println("更新界面为device最新截图");
     }

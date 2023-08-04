@@ -1,6 +1,5 @@
-package sample;
+package com.huawei.scrcpy_ohos;
 
-import com.sun.glass.ui.Size;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -27,7 +26,7 @@ import java.io.InputStreamReader;
  * <p>
  * success: snapshot display 0 , write to /data/snapshot_2023-07-06_13-56-30.jpeg as jpeg, width 720, height 1280
  */
-public class Main extends Application {
+public class HelloApplication extends Application {
     static int width;
     static int height;
     static double scaleRatio;
@@ -35,7 +34,13 @@ public class Main extends Application {
     static int scaleHeight = (int) (height * scaleRatio);
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) throws IOException {
+//        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
+//        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
+//        stage.setTitle("Hello!");
+//        stage.setScene(scene);
+//        stage.show();
+
         Size size1 = getPcScreenInfo();
         int pcScreenWidth = size1.width;
         int pcScreenHeight = size1.height;
@@ -50,7 +55,7 @@ public class Main extends Application {
         height = phoneScreenHeight;
 
         if (phoneScreenHeight >= pcScreenHeight) {
-            scaleHeight = (int) (pcScreenHeight * 0.8);
+            scaleHeight = (int) (pcScreenHeight * 0.65f);
             scaleRatio = phoneScreenHeight * 1.0f / scaleHeight;
             scaleWidth = (int) (phoneScreenWidth / scaleRatio);
 
@@ -61,18 +66,18 @@ public class Main extends Application {
             scaleRatio = 1;
         }
 
-        Class<? extends Main> clz = getClass();
-        FXMLLoader loader = new FXMLLoader(clz.getResource("sample.fxml"));
+        Class<? extends HelloApplication> clz = getClass();
+        FXMLLoader loader = new FXMLLoader(clz.getResource("hello-view.fxml"));
         Parent root = loader.load();
 
-        Controller controller = (Controller) loader.getController();
+        HelloController controller = (HelloController) loader.getController();
 
         primaryStage.setTitle("Hello World");
         //初始化窗口位置
         primaryStage.setX(25);
         primaryStage.setY(25);
 
-        primaryStage.setScene(new Scene(root, scaleWidth, scaleHeight));
+        primaryStage.setScene(new Scene(root, scaleWidth, scaleHeight + 50));
 
         primaryStage.show();
 
@@ -148,6 +153,6 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
-        launch(args);
+        launch();
     }
 }
