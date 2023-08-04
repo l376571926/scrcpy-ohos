@@ -6,3 +6,6 @@ hdc file recv /data/local/tmp/snapshot.jpeg snapshot.jpeg
 
 gradle javafx:
 implementation 'org.openjfx:javafx-fxml:11'
+
+//截屏并保存到当前文件夹
+hdc shell "snapshot_display -f /data/0.jpeg" | hdc file recv /data/0.jpeg

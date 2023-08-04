@@ -56,7 +56,7 @@ public class Controller {
                 switch (event.getButton()) {
                     case PRIMARY:
                         System.out.println("event.getButton() 左键");
-                        click((int) (x * 2), (int) (y * 2));
+                        click((int) (x * Main.scaleRatio), (int) (y * Main.scaleRatio));
 
                         delayRefreshUI();
                         break;
@@ -89,7 +89,7 @@ public class Controller {
 
         //hdc shell uinput -T -g 466 748 466 668
         try {
-            Process process = runtime.exec(String.format("hdc shell uinput -T -g %d %d %d %d", (int) (startX * 2), (int) (startY * 2), (int) (startX * 2), (int) ((startY + deltaY) * 2)));
+            Process process = runtime.exec(String.format("hdc shell uinput -T -g %d %d %d %d", (int) (startX * Main.scaleRatio), (int) (startY * Main.scaleRatio), (int) (startX * Main.scaleRatio), (int) ((startY + deltaY) * Main.scaleRatio)));
             System.out.println("滚动日志--------start------------");
             printShellLog(process.getInputStream());
             System.out.println("滚动日志--------finish------------");
