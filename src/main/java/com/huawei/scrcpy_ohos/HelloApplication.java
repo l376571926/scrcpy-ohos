@@ -73,7 +73,7 @@ public class HelloApplication extends Application {
 
         HelloController controller = (HelloController) loader.getController();
 
-        primaryStage.setTitle("Hello World");
+        primaryStage.setTitle("scrcpy-ohos");
         //初始化窗口位置
         primaryStage.setX(25);
         primaryStage.setY(25);
