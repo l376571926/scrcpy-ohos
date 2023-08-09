@@ -27,8 +27,8 @@ import java.io.InputStreamReader;
  * success: snapshot display 0 , write to /data/snapshot_2023-07-06_13-56-30.jpeg as jpeg, width 720, height 1280
  */
 public class HelloApplication extends Application {
-    static int width;
-    static int height;
+    static int width = 720;
+    static int height = 1280;
     static double scaleRatio;
     static int scaleWidth = (int) (width * scaleRatio);
     static int scaleHeight = (int) (height * scaleRatio);
@@ -49,10 +49,11 @@ public class HelloApplication extends Application {
         Size size = getDeviceScreenInfo();
         int phoneScreenWidth = size.width;
         int phoneScreenHeight = size.height;
+        if (phoneScreenWidth != 0 || phoneScreenHeight != 0) {
+            width = phoneScreenWidth;
+            height = phoneScreenHeight;
+        }
         System.out.println("手机屏幕信息，宽 = " + phoneScreenWidth + " 高 = " + phoneScreenHeight);
-
-        width = phoneScreenWidth;
-        height = phoneScreenHeight;
 
         if (phoneScreenHeight >= pcScreenHeight) {
             scaleHeight = (int) (pcScreenHeight * 0.65f);
@@ -77,7 +78,7 @@ public class HelloApplication extends Application {
         primaryStage.setX(25);
         primaryStage.setY(25);
 
-        primaryStage.setScene(new Scene(root, scaleWidth, scaleHeight + 50));
+        primaryStage.setScene(new Scene(root, scaleWidth, scaleHeight + 100));
 
         primaryStage.show();
 

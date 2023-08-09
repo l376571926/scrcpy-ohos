@@ -1,5 +1,6 @@
 package com.huawei.scrcpy_ohos;
 
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class HelloController {
     @FXML
-    private Label welcomeText;
+    public Label welcomeText;
 
     @FXML
     protected void onHelloButtonClick() {
@@ -233,6 +234,28 @@ public class HelloController {
                 loadLatestScreenImage();
             }
         }).start();
+    }
+
+    public void onBackButtonClick(ActionEvent actionEvent) {
+        try {
+            runtime.exec("hdc shell uinput -K -d 2 -u 2");
+            delayRefreshUI();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void onHomeButtonClick(ActionEvent actionEvent) {
+        try {
+            runtime.exec("hdc shell uinput -K -d 1 -u 1");
+            delayRefreshUI();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void onRefreshButtonClick(ActionEvent actionEvent) {
+        delayRefreshUI();
     }
 
 //    void testMouseEvent() {

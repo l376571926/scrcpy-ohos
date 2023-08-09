@@ -9,3 +9,10 @@ implementation 'org.openjfx:javafx-fxml:11'
 
 //截屏并保存到当前文件夹
 hdc shell "snapshot_display -f /data/0.jpeg" | hdc file recv /data/0.jpeg
+
+//模拟back按键
+https://blog.csdn.net/supernova_TOP/article/details/129082929
+> hdc shell uinput -K -d 2 -u 2		//按下和弹起键值为2的按键(即back键)
+you raised the key 2
+> hdc shell uinput -K -d 1 -u 1		//按下和弹起键值为1的按键(即home键)
+you raised the key 1
