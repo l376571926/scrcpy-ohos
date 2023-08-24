@@ -28,11 +28,23 @@ public class HelloController {
     public HelloController() {
         System.out.println("constructor");
 
-//        List<String> logList = new ArrayList<>();
-//        logList.add("Notify windowvisibilityinfo changed start");
-//        logList.add("Active window not change, id: 38, 5101");
-
         runtime = Runtime.getRuntime();
+        //定时获取手机界面截屏并刷新界面
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                captureScreenAndRender();
+//
+//                loadLatestScreenImage();
+//            }
+//        }).start();
+
     }
 
     /**
@@ -73,10 +85,7 @@ public class HelloController {
                     case SECONDARY:
                         System.out.println("event.getButton() 右键");
 
-                        //返回按钮的坐标：208 1244
-                        click(208, 1244);
-
-                        delayRefreshUI();
+                        onBackButtonClick(null);
                         break;
                     case MIDDLE:
                         System.out.println("event.getButton() 中键");

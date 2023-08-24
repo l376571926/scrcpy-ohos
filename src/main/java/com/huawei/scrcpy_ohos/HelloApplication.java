@@ -11,10 +11,9 @@ import javafx.scene.input.ScrollEvent;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * C:\Users\admin>hdc shell
@@ -29,74 +28,80 @@ import java.io.InputStreamReader;
 public class HelloApplication extends Application {
     static int width = 720;
     static int height = 1280;
-    static double scaleRatio;
+    static double scaleRatio = 1;
     static int scaleWidth = (int) (width * scaleRatio);
     static int scaleHeight = (int) (height * scaleRatio);
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-//        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
-//        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
-//        stage.setTitle("Hello!");
-//        stage.setScene(scene);
-//        stage.show();
-
         Size size1 = getPcScreenInfo();
         int pcScreenWidth = size1.width;
         int pcScreenHeight = size1.height;
         System.out.println("电脑屏幕尺寸，宽 = " + pcScreenWidth + " 高 = " + pcScreenHeight);
 
         Size size = getDeviceScreenInfo();
-        int phoneScreenWidth = size.width;
-        int phoneScreenHeight = size.height;
-        if (phoneScreenWidth != 0 || phoneScreenHeight != 0) {
-            width = phoneScreenWidth;
-            height = phoneScreenHeight;
+        if (size != null) {
+            int phoneScreenWidth = size.width;
+            int phoneScreenHeight = size.height;
+            if (phoneScreenWidth != 0 || phoneScreenHeight != 0) {
+                width = phoneScreenWidth;
+                height = phoneScreenHeight;
+            }
+            System.out.println("手机屏幕信息，宽 = " + phoneScreenWidth + " 高 = " + phoneScreenHeight);
         }
-        System.out.println("手机屏幕信息，宽 = " + phoneScreenWidth + " 高 = " + phoneScreenHeight);
-
-        if (phoneScreenHeight >= pcScreenHeight) {
+        if (height >= pcScreenHeight) {
             scaleHeight = (int) (pcScreenHeight * 0.65f);
-            scaleRatio = phoneScreenHeight * 1.0f / scaleHeight;
-            scaleWidth = (int) (phoneScreenWidth / scaleRatio);
+            scaleRatio = height * 1.0f / scaleHeight;
+            scaleWidth = (int) (width / scaleRatio);
 
             System.out.println("手机高度大于电脑，手机屏幕缩放信息，宽 = " + scaleWidth + " 高 = " + scaleHeight + " 比例 = " + scaleRatio);
         } else {
-            scaleWidth = phoneScreenWidth;
-            scaleHeight = phoneScreenHeight;
+            scaleWidth = width;
+            scaleHeight = height;
             scaleRatio = 1;
         }
 
-        Class<? extends HelloApplication> clz = getClass();
-        FXMLLoader loader = new FXMLLoader(clz.getResource("hello-view.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("hello-view.fxml"));
         Parent root = loader.load();
-
         HelloController controller = (HelloController) loader.getController();
 
+        //设置标题栏标题
         primaryStage.setTitle("scrcpy-ohos");
         //初始化窗口位置
         primaryStage.setX(25);
         primaryStage.setY(25);
 
-        primaryStage.setScene(new Scene(root, scaleWidth, scaleHeight + 100));
+        Scene scene = new Scene(root, scaleWidth, scaleHeight + 100);
+        primaryStage.setScene(scene);
+
+        Image place_holder = new Image(getClass().getResource("screenshot.jpeg").toString(), scaleWidth, scaleHeight, false, true, false);
+        controller.my_image.setImage(place_holder);
 
         primaryStage.show();
+
+        //检测OpenHarmony设备是否已连接
+        Map<String, Object> exec1 = RuntimeHelper.getInstance().exec("hdc list targets");
+        List<String> successMessage = RuntimeHelper.getInstance().getData(exec1);
+        if ("[Empty]".equals(successMessage.get(0))) {
+            System.out.println("OpenHarmony设备未连接");
+            return;
+        }
+
+        //切换为性能模式，不让设备熄屏
+        Map<String, Object> exec = RuntimeHelper.getInstance().exec("hdc shell power-shell setmode 602");
+        if (!RuntimeHelper.getInstance().isSuccess(exec)) {
+            RuntimeHelper.getInstance().printErrorMessage(exec);
+            return;
+        }
 
         controller.captureScreenAndRender();
         controller.loadLatestScreenImage();
 
-        root.setOnScroll(new EventHandler<ScrollEvent>() {
-            @Override
-            public void handle(ScrollEvent event) {
-
-            }
-        });
         root.addEventFilter(ScrollEvent.ANY, new EventHandler<ScrollEvent>() {
             @Override
             public void handle(ScrollEvent event) {
                 System.out.println("addEventFilter = " + event.toString());
                 //鼠标滚轮滚动距离
-                double deltaY = event.getDeltaY();
                 controller.onMouseScroll(event);
             }
         });
@@ -114,38 +119,25 @@ public class HelloApplication extends Application {
     private Size getDeviceScreenInfo() {
         Size size = new Size();
 
-        try {
-            Process process = Runtime.getRuntime().exec("hdc shell snapshot_display");
-            InputStream inputStream = process.getInputStream();
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            while (true) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-//                System.out.println("日志打印：" + line);
-                if (line.contains("process: display 0: width ")) {
-                    int index1 = line.indexOf("width") + 6;
-                    int index2 = line.indexOf(",");
-                    int index3 = line.indexOf("height") + 7;
-
-                    String width = line.substring(index1, index2);
-                    String height = line.substring(index3);
-//                    System.out.println("设备屏幕尺寸，宽 = <" + width + "> 高 = <" + height + ">");
-                    size.width = Integer.parseInt(width);
-                    size.height = Integer.parseInt(height);
-                }
-            }
-            reader.close();
-            inputStream.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        //[Fail]ExecuteCommand need connect-key?
+        Map<String, Object> exec = RuntimeHelper.getInstance().exec("hdc shell snapshot_display");
+        List<String> stringList = RuntimeHelper.getInstance().getData(exec);
+        if ("[Fail]ExecuteCommand need connect-key?".equals(stringList.get(0))) {
+            return null;
         }
-//            }
-//        }).start();
+        for (String line : stringList) {
+            if (line.contains("process: display 0: width ")) {
+                int index1 = line.indexOf("width") + 6;
+                int index2 = line.indexOf(",");
+                int index3 = line.indexOf("height") + 7;
+
+                String width = line.substring(index1, index2);
+                String height = line.substring(index3);
+//                    System.out.println("设备屏幕尺寸，宽 = <" + width + "> 高 = <" + height + ">");
+                size.width = Integer.parseInt(width);
+                size.height = Integer.parseInt(height);
+            }
+        }
         return size;
     }
 
